@@ -70,6 +70,7 @@ Fetch sample log from CloudWatch Logs:
   #message_keys key1,key2,key3,...
   #max_message_length 32768
   #use_tag_as_group false
+  #use_stream_from_array false
 </match>
 ```
 
@@ -80,6 +81,34 @@ Fetch sample log from CloudWatch Logs:
 * `message_keys`: keys to send messages as events
 * `max_message_length`: maximum length of the message
 * `use_tag_as_group`: to use tag as a group name
+* `use_stream_from_array`: to use array key "stream" for stream name (when is true use_tag_as_group is set to false)
+
+```
+For use_stream_from_array
+message in fluent must be arrayed:
+
+<source>
+  type udp
+  port 5140
+  bind 0.0.0.0
+  tag tag
+  format /^(?<time>[^ ]* [^ ]* [^ ]*)\|\|(?<group>.*)\|\|(?<stream>.*)\|\|(?<message>[^\|\|]*)$/
+  time_format %b %d %H:%M:%S
+  body_size_limit 10MB
+</source>
+
+<match tag>
+                type cloudwatch_logs
+                log_group_name tag
+                log_stream_name none
+                auto_create_stream true
+                aws_key_id key
+                aws_sec_key secret
+                region region
+                use_tag_as_group false
+                use_stream_from_array true
+</match>
+```
 
 ### in_cloudwatch_logs
 
